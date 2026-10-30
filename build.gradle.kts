@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "es.bugfix"
-version = "0.1.0"
+version = providers.environmentVariable("VERSION").getOrElse("0.1.0-SNAPSHOT") // set from the v* tag by publish.yml
 
 android {
     namespace = "es.bugfix.client"
