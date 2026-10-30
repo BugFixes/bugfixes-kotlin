@@ -24,7 +24,7 @@ jobs:
       - name: Run tests
         run: ./gradlew test
       - name: Publish to Maven Central
-        run: ./gradlew publishToMavenCentral
+        run: ./gradlew publishAllPublicationsToMavenStageRepository publishToMavenCentral  # the upload only zips the stage, it does not fill it
         env:
           SIGNING_SETUP: ${{ secrets.MAVEN_CENTRAL_PUBLISH_GPG }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
