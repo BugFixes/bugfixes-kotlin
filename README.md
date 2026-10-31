@@ -77,12 +77,26 @@ bugfixes.log(Level.INFO, "screen opened")          // not sent unless .level(Lev
 
 Every report carries the device context: Android version and API level, manufacturer and model, app version and build.
 
+## Release builds
+
+R8 renames your classes and methods, so upload each build's mapping file from CI, or crashes from that build stay obfuscated and their reports say `unsymbolicated`. Upload it before the build reaches users: reports that arrive first keep their obfuscated stack.
+
+```sh
+curl --fail --data-binary @app/build/outputs/mapping/release/mapping.txt \
+  -H "X-API-KEY: $BUGFIXES_AGENT_KEY" -H "X-API-SECRET: $BUGFIXES_AGENT_SECRET" \
+  --url-query platform=android --url-query "release=$VERSION_NAME ($VERSION_CODE)" \
+  https://api.bugfix.es/v1/symbols
+```
+
+- Use the agent's key and secret, the same agent as the mobile key. These are CI secrets: **never put them in the app**.
+- `release` must match what the SDK sends exactly, which by default is `versionName (versionCode)`.
+- The file can be up to 256 MB. The newest 20 releases are kept per agent.
+
 ## Limits
 
 - **Android 10 and lower:** only JVM crashes are captured; ANRs and native crashes need `ApplicationExitInfo` (API 30+).
 - **Native crashes:** sent with the system's description only. Their tombstone is a binary protobuf, which isn't parsed.
 - **First launch:** ANRs and native crashes from before the SDK was added aren't sent.
-- **Release builds:** R8-obfuscated stack traces stay obfuscated until mapping-file upload exists (BF-54).
 - **Retries:** reports that couldn't be sent are retried with the next report or on the next launch, not when the network returns.
 
 ## Development
